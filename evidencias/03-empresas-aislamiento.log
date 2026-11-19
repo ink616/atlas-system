@@ -1,0 +1,52 @@
+### CP-FUN-05/07/21 + CP-SEG-08 - 20-10-2026 00:22:10
+[00:22:10] CP-FUN-05 POST /api/empresas password='1'
+{"mensaje":"Empresa y usuario administrador creados exitosamente","empresa":{"id":2,"nombre":"Empresa QA Dos SpA","rut":"76.000.002-2","direccion":"Calle QA 2","correo":"admin@empresados.cl","created_at":"2026-10-20T03:22:10.266Z"},"usuario":{"id":3,"nombre":"Admin Dos","email":"admin@empresados.cl","rol":"ADMINISTRADOR"}}
+  -> HTTP 201
+[00:22:10] CP-FUN-05 POST /api/empresas password='123456'
+{"mensaje":"Empresa y usuario administrador creados exitosamente","empresa":{"id":3,"nombre":"Empresa QA Tres SpA","rut":"76.000.003-3","direccion":null,"correo":"admin@empresatres.cl","created_at":"2026-10-20T03:22:10.442Z"},"usuario":{"id":4,"nombre":"Admin Tres","email":"admin@empresatres.cl","rol":"ADMINISTRADOR"}}
+  -> HTTP 201
+ id |        email         |      rol      | empresa_id |         nombre          
+----+----------------------+---------------+------------+-------------------------
+  1 | admin@atlas.cl       | ADMINISTRADOR |          1 | Transportes Bío Bío SpA
+  2 | editor@atlas.cl      | EDITOR        |          1 | Transportes Bío Bío SpA
+  3 | admin@empresados.cl  | ADMINISTRADOR |          2 | Empresa QA Dos SpA
+  4 | admin@empresatres.cl | ADMINISTRADOR |          3 | Empresa QA Tres SpA
+(4 rows)
+
+[00:22:10] CP-FUN-07 login admin@empresados.cl / '1'
+{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJhZG1pbkBlbXByZXNhZG9zLmNsIiwicm9sIjoiQURNSU5JU1RSQURPUiIsImVtcHJlc2FfaWQiOjIsImlhdCI6MTc5MjQ2NjUzMCwiZXhwIjoxNzkyNDk1MzMwfQ.HCZTxZVtIeppUEN7URI0TQ2uGvgC44c6PBZPkjFLL4s","usuario":{"id":3,"nombre":"Admin Dos","rol":"ADMINISTRADOR"}}
+  -> HTTP 200
+[00:22:10] CP-FUN-21 correo duplicado admin@atlas.cl (RUT nuevo)
+{"error":"El RUT de empresa o correo ya se encuentra registrado."}
+  -> HTTP 409
+[00:22:11] CP-FUN-21 RUT de empresa duplicado 76.543.210-K
+{"error":"El RUT de empresa o correo ya se encuentra registrado."}
+  -> HTTP 409
+ id |         nombre          |     rut      
+----+-------------------------+--------------
+  1 | Transportes Bío Bío SpA | 76.543.210-K
+  2 | Empresa QA Dos SpA      | 76.000.002-2
+  3 | Empresa QA Tres SpA     | 76.000.003-3
+(3 rows)
+
+[00:22:11] CP-SEG-08 empresa 2: GET /api/clientes
+[]
+  -> HTTP 200
+[00:22:11] CP-SEG-08 empresa 2: GET /api/contratos
+[]
+  -> HTTP 200
+[00:22:11] CP-SEG-08 empresa 2: GET /api/auditoria
+[]
+  -> HTTP 200
+[00:22:11] CP-SEG-08 empresa 2: DELETE /api/clientes/25 (cliente de empresa 1)
+{"error":"Cliente no encontrado."}
+  -> HTTP 404
+[00:22:11] CP-SEG-08 empresa 2: POST /api/contratos/25/documentos (cliente de empresa 1)
+{"error":"Cliente no encontrado."}
+  -> HTTP 404
+[00:22:11] CP-SEG-08 empresa 2: POST /api/clientes
+{"id":30,"empresa_id":2,"rut":"88.888.888-8","razon_social":"Cliente de Empresa Dos","datos_bancarios":null,"created_at":"2026-10-20T03:22:11.768Z"}
+  -> HTTP 201
+[00:22:11] CP-SEG-08 empresa 1 (admin@atlas.cl): GET /api/clientes (no debe ver cliente de empresa 2)
+[{"id":25,"empresa_id":1,"rut":"99.888.777-6","razon_social":"Distribuidora del Sur Ltda.","datos_bancarios":{"banco":"Banco de Chile","cuenta":"00-12345-6"},"created_at":"2026-10-20T02:53:04.648Z"},{"id":26,"empresa_id":1,"rut":"76.111.222-3","razon_social":"Cliente Smoke SpA","datos_bancarios":{"banco":"BancoEstado","cuenta":"123456789"},"created_at":"2026-10-20T03:21:50.922Z"},{"id":28,"empresa_id":1,"rut":"ABCDEFG","razon_social":"RUT letras","datos_bancarios":null,"created_at":"2026-10-20T03:21:52.047Z"},{"id":29,"empresa_id":1,"rut":"12.345.678-0","razon_social":"RUT DV malo","datos_bancarios":null,"created_at":"2026-10-20T03:21:52.139Z"}]
+  -> HTTP 200

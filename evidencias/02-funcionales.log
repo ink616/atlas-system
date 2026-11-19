@@ -1,0 +1,49 @@
+### SMOKE crear cliente / CP-FUN-03/09/13/14/20 - 20-10-2026 00:21:50
+--- CP-FUN-03: payload JWT admin
+{"id":1,"email":"admin@atlas.cl","rol":"ADMINISTRADOR","empresa_id":1,"iat":1792466493,"exp":1792495293}
+[00:21:50] SMOKE POST /api/clientes (admin) rut=76.111.222-3
+{"id":26,"empresa_id":1,"rut":"76.111.222-3","razon_social":"Cliente Smoke SpA","datos_bancarios":{"banco":"BancoEstado","cuenta":"123456789"},"created_at":"2026-10-20T03:21:50.922Z"}
+  -> HTTP 201
+[00:21:51] CP-FUN-03 POST /api/auth/logout (admin)
+{"error":"Ruta no encontrada."}
+  -> HTTP 404
+  (Se cierra sesion en el frontend = solo localStorage.removeItem; se reusa el mismo token:)
+[00:21:51] CP-FUN-03 GET /api/clientes con token tras logout
+[{"id":25,"empresa_id":1,"rut":"99.888.777-6","razon_social":"Distribuidora del Sur Ltda.","datos_bancarios":{"banco":"Banco de Chile","cuenta":"00-12345-6"},"created_at":"2026-10-20T02:53:04.648Z"},{"id":26,"empresa_id":1,"rut":"76.111.222-3","razon_social":"Cliente Smoke SpA","datos_bancarios":{"banco":"BancoEstado","cuenta":"123456789"},"created_at":"2026-10-20T03:21:50.922Z"}]
+  -> HTTP 200
+[00:21:51] CP-FUN-09 POST /api/clientes (EDITOR)
+{"id":27,"empresa_id":1,"rut":"77.333.444-5","razon_social":"Cliente creado por Editor","datos_bancarios":null,"created_at":"2026-10-20T03:21:51.241Z"}
+  -> HTTP 201
+[00:21:51] CP-FUN-09 POST /api/contratos/25/documentos (EDITOR)
+{"mensaje":"Documento PDF subido e integrado exitosamente","contrato":{"id":1,"cliente_id":25,"titulo":"Contrato de Servicios Transporte","monto":"1500000.00","pdf_url":"/uploads/contrato_2026.pdf","created_at":"2026-10-20T03:21:51.369Z"}}
+  -> HTTP 201
+  id cliente editor=27
+[00:21:51] CP-FUN-13 DELETE /api/clientes/27 (EDITOR)
+{"error":"Acceso prohibido: No posees los permisos requeridos para ejecutar esta acción.","rol_actual":"EDITOR"}
+  -> HTTP 403
+[00:21:51] CP-FUN-13 DELETE /api/clientes/27 (ADMIN)
+{"mensaje":"Cliente con ID 27 eliminado lógicamente con éxito."}
+  -> HTTP 200
+[00:21:51] CP-FUN-13 GET /api/clientes tras eliminar
+[{"id":25,"empresa_id":1,"rut":"99.888.777-6","razon_social":"Distribuidora del Sur Ltda.","datos_bancarios":{"banco":"Banco de Chile","cuenta":"00-12345-6"},"created_at":"2026-10-20T02:53:04.648Z"},{"id":26,"empresa_id":1,"rut":"76.111.222-3","razon_social":"Cliente Smoke SpA","datos_bancarios":{"banco":"BancoEstado","cuenta":"123456789"},"created_at":"2026-10-20T03:21:50.922Z"}]
+  -> HTTP 200
+ id |       razon_social        | eliminado_logico 
+----+---------------------------+------------------
+ 27 | Cliente creado por Editor | t
+(1 row)
+
+[00:21:52] CP-FUN-14 RUT 'ABCDEFG' 
+{"id":28,"empresa_id":1,"rut":"ABCDEFG","razon_social":"RUT letras","datos_bancarios":null,"created_at":"2026-10-20T03:21:52.047Z"}
+  -> HTTP 201
+[00:21:52] CP-FUN-14 RUT con DV incorrecto 12.345.678-0
+{"id":29,"empresa_id":1,"rut":"12.345.678-0","razon_social":"RUT DV malo","datos_bancarios":null,"created_at":"2026-10-20T03:21:52.139Z"}
+  -> HTTP 201
+[00:21:52] CP-FUN-14 RUT 13 caracteres
+{"error":"El RUT del cliente es obligatorio y debe tener hasta 12 caracteres."}
+  -> HTTP 400
+[00:21:52] CP-FUN-20 GET /api/auditoria (ADMIN)
+[{"id":6,"usuario_id":1,"accion":"CREAR_CLIENTE","detalle":"Creación de cliente ID: 29","timestamp":"2026-10-20T03:21:52.139Z"},{"id":5,"usuario_id":1,"accion":"CREAR_CLIENTE","detalle":"Creación de cliente ID: 28","timestamp":"2026-10-20T03:21:52.047Z"},{"id":4,"usuario_id":1,"accion":"ELIMINAR_CLIENTE","detalle":"Eliminación lógica de cliente ID: 27","timestamp":"2026-10-20T03:21:51.617Z"},{"id":3,"usuario_id":2,"accion":"SUBIR_DOCUMENTO_PDF","detalle":"Documento PDF asociado al contrato ID: 1","timestamp":"2026-10-20T03:21:51.369Z"},{"id":2,"usuario_id":2,"accion":"CREAR_CLIENTE","detalle":"Creación de cliente ID: 27","timestamp":"2026-10-20T03:21:51.241Z"},{"id":1,"usuario_id":1,"accion":"CREAR_CLIENTE","detalle":"Creación de cliente ID: 26","timestamp":"2026-10-20T03:21:50.922Z"}]
+  -> HTTP 200
+[00:21:52] CP-FUN-20 GET /api/auditoria (EDITOR)
+{"error":"Acceso prohibido: No posees los permisos requeridos para ejecutar esta acción.","rol_actual":"EDITOR"}
+  -> HTTP 403

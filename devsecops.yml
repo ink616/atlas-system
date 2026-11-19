@@ -1,0 +1,119 @@
+# Pipeline DevSecOps de Atlas (EP3 ISY1102)
+# Implementa, como controles automatizados, el mismo pipeline del diagrama del informe:
+# SOURCE (secretos) -> BUILD (dependencias/SCA) -> TEST (automatizacion) -> SEGURIDAD (SAST/DAST) -> DEPLOY (gate).
+# Cada job es un "control" y deja su evidencia (el log del job) para la auditoria.
+
+name: DevSecOps Atlas
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+
+  # --- SOURCE: control de secretos ---
+  source-secretos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Escaneo de secretos (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Norma: OWASP A05 / ISO 27001 A.8 - previene DEF-007 (secretos en el codigo)
+
+  # --- BUILD: analisis de dependencias (SCA) ---
+  build-sca:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: npm audit backend
+        working-directory: backend
+        run: npm install --package-lock-only && npm audit --audit-level=high || true
+      - name: npm audit frontend
+        working-directory: frontend
+        run: npm install --package-lock-only && npm audit --audit-level=high || true
+        # Norma: OWASP A06 / Ley 17.336 - detecta DEF-008 (vite/esbuild con CVE)
+
+  # --- TEST: automatizacion funcional + API ---
+  test-automatizado:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Levantar Atlas (Docker Compose)
+        run: |
+          docker compose up -d --build
+          echo "Esperando a que la API responda..."
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:5000/api/health && break || sleep 3
+          done
+      - name: Pruebas de API (Newman)
+        run: |
+          npm install -g newman newman-reporter-htmlextra
+          newman run tests/automation/api/atlas_api.postman_collection.json \
+            -e tests/automation/api/atlas_env.postman_environment.json \
+            --reporters cli,htmlextra --reporter-htmlextra-export reporte_api.html
+      - name: Pruebas E2E (Cypress)
+        working-directory: tests/automation/e2e
+        run: |
+          npm install
+          npx cypress run --spec "cypress/e2e/funcionales.cy.js"
+      - name: Guardar evidencia
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-automatizacion
+          path: |
+            reporte_api.html
+            tests/automation/e2e/cypress/videos
+            tests/automation/e2e/cypress/screenshots
+        # Norma: ISO/IEC 25010 (adecuacion funcional) - regresion de RF-1..RF-6 y RBAC
+
+  # --- SEGURIDAD: SAST (Semgrep) + DAST (OWASP ZAP) ---
+  seguridad-sast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Semgrep (SAST)
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/owasp-top-ten
+            p/nodejs
+            p/javascript
+        # Norma: OWASP Top 10 / Ley 19.628 y 21.719 - DEF-005/003 (datos sin cifrar, RBAC)
+
+  seguridad-dast:
+    runs-on: ubuntu-latest
+    needs: test-automatizado
+    steps:
+      - uses: actions/checkout@v4
+      - name: Levantar Atlas para escaneo dinamico
+        run: |
+          docker compose up -d --build
+          for i in $(seq 1 30); do curl -sf http://localhost:5000/api/health && break || sleep 3; done
+      - name: OWASP ZAP baseline (DAST)
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://localhost:3000'
+          fail_action: false
+        # Norma: OWASP Top 10 - CSRF/XSS, cabeceras, control de acceso
+
+  # --- DEPLOY: gate de calidad ---
+  deploy-gate:
+    runs-on: ubuntu-latest
+    needs: [source-secretos, build-sca, test-automatizado, seguridad-sast, seguridad-dast]
+    steps:
+      - name: Gate de aceptacion
+        run: |
+          echo "Todos los controles ejecutados."
+          echo "Regla del plan: no se despliega con hallazgos CRITICOS abiertos."
+          echo "Revisar los artefactos de evidencia antes de aprobar el despliegue."
+        # Norma: criterio de aceptacion del plan de pruebas (seccion 3.3 del informe)

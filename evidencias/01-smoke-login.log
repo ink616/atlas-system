@@ -1,0 +1,26 @@
+### SMOKE + CP-FUN-01/02/03 - 20-10-2026 00:21:32
+NAME             IMAGE                         COMMAND                  SERVICE          CREATED          STATUS                    PORTS
+atlas-backend    atlas-system-atlas-backend    "docker-entrypoint.s…"   atlas-backend    28 minutes ago   Up 28 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
+atlas-db         postgres:15-alpine            "docker-entrypoint.s…"   atlas-db         28 minutes ago   Up 28 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+atlas-frontend   atlas-system-atlas-frontend   "/docker-entrypoint.…"   atlas-frontend   28 minutes ago   Up 28 minutes             0.0.0.0:3000->80/tcp, [::]:3000->80/tcp
+
+[00:21:32] GET http://localhost:5000/api/health
+{"status":"ok"}  -> HTTP 200
+
+[00:21:32] CP-FUN-01 POST /api/auth/login admin@atlas.cl / Password123!
+{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBhdGxhcy5jbCIsInJvbCI6IkFETUlOSVNUUkFET1IiLCJlbXByZXNhX2lkIjoxLCJpYXQiOjE3OTI0NjY0OTMsImV4cCI6MTc5MjQ5NTI5M30.rI6t_OS9zqtPs7lb3-0BRzkjKqGJgUSLjyUkPzXZt4s","usuario":{"id":1,"nombre":"Administrador Atlas","rol":"ADMINISTRADOR"}}
+  -> HTTP 200
+
+[00:21:33] CP-FUN-01 POST /api/auth/login editor@atlas.cl / Password123!
+{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJlZGl0b3JAYXRsYXMuY2wiLCJyb2wiOiJFRElUT1IiLCJlbXByZXNhX2lkIjoxLCJpYXQiOjE3OTI0NjY0OTMsImV4cCI6MTc5MjQ5NTI5M30.RvIvcuiembDiReIn3mo_oziTYcnNqEmEZadh-RlW_Sk","usuario":{"id":2,"nombre":"Editor Atlas","rol":"EDITOR"}}
+  -> HTTP 200
+
+[00:21:33] CP-FUN-02 password incorrecta
+{"error":"Credenciales inválidas"}
+  -> HTTP 401
+[00:21:33] CP-FUN-02 correo inexistente
+{"error":"Credenciales inválidas"}
+  -> HTTP 401
+[00:21:33] CP-FUN-02 campos vacios
+{"error":"Correo electrónico y contraseña son obligatorios."}
+  -> HTTP 400

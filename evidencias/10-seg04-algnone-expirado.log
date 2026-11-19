@@ -1,0 +1,9 @@
+### CP-SEG-04 (complemento) - 20-10-2026 01:41:52
+  token alg none: eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBhdGxhcy5jbCIsInJvbCI6IkFETUlOSVNUUkFET1IiLCJlbXByZXNhX2lkIjoxfQ.
+[01:41:53] Token con alg none GET /api/clientes
+{"error":"Token inválido o expirado."}
+  -> HTTP 401
+  token expirado (exp = hace 1 h): eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...
+[01:41:57] Token expirado GET /api/clientes
+{"error":"Token inválido o expirado."}
+  -> HTTP 401

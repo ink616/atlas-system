@@ -1,0 +1,96 @@
+### CP-SEG-02/03/04/07 - 20-10-2026 00:22:23
+--- CP-SEG-02 hashes de contraseñas
+ id |        email         | prefijo | largo |                        password_hash                         
+----+----------------------+---------+-------+--------------------------------------------------------------
+  1 | admin@atlas.cl       | $2a$10$ |    60 | $2a$10$8uNpVz4i2H0deke0hBNcoO1.ZiJGcFUuKpMG7bgSrp80ZUCuSK5M2
+  2 | editor@atlas.cl      | $2a$10$ |    60 | $2a$10$8uNpVz4i2H0deke0hBNcoO1.ZiJGcFUuKpMG7bgSrp80ZUCuSK5M2
+  3 | admin@empresados.cl  | $2a$10$ |    60 | $2a$10$r4UX7QwfANmS.69zMHXeEeC23z2Ge4UapmdYX0kCLJgu5PttnxvJa
+  4 | admin@empresatres.cl | $2a$10$ |    60 | $2a$10$hMJFvTyfzQlHhUGCe0jV8.qO6jHEVt6mHBhHrY67IXfKhMcAH7OjO
+(4 rows)
+
+--- CP-SEG-03 datos bancarios en BD
+ id | empresa_id |     rut      |                   datos_bancarios                   
+----+------------+--------------+-----------------------------------------------------
+ 25 |          1 | 99.888.777-6 | {"banco": "Banco de Chile", "cuenta": "00-12345-6"}
+ 26 |          1 | 76.111.222-3 | {"banco": "BancoEstado", "cuenta": "123456789"}
+(2 rows)
+
+--- CP-SEG-04
+[00:22:24] SIN TOKEN GET /api/clientes
+{"error":"Acceso denegado. Token no proporcionado."}
+  -> HTTP 401
+[00:22:24] TOKEN BASURA GET /api/clientes
+{"error":"Token inválido o expirado."}
+  -> HTTP 401
+[00:22:24] SIN TOKEN GET /api/contratos
+{"error":"Acceso denegado. Token no proporcionado."}
+  -> HTTP 401
+[00:22:24] TOKEN BASURA GET /api/contratos
+{"error":"Token inválido o expirado."}
+  -> HTTP 401
+[00:22:24] SIN TOKEN GET /api/auditoria
+{"error":"Acceso denegado. Token no proporcionado."}
+  -> HTTP 401
+[00:22:24] TOKEN BASURA GET /api/auditoria
+{"error":"Token inválido o expirado."}
+  -> HTTP 401
+[00:22:24] SIN TOKEN POST /api/clientes
+{"error":"Acceso denegado. Token no proporcionado."}
+  -> HTTP 401
+[00:22:24] TOKEN BASURA POST /api/clientes
+{"error":"Token inválido o expirado."}
+  -> HTTP 401
+[00:22:24] SIN TOKEN DELETE /api/clientes/25
+{"error":"Acceso denegado. Token no proporcionado."}
+  -> HTTP 401
+[00:22:24] TOKEN BASURA DELETE /api/clientes/25
+{"error":"Token inválido o expirado."}
+  -> HTTP 401
+[00:22:24] SIN TOKEN POST /api/contratos/25/documentos
+{"error":"Acceso denegado. Token no proporcionado."}
+  -> HTTP 401
+[00:22:24] TOKEN BASURA POST /api/contratos/25/documentos
+{"error":"Token inválido o expirado."}
+  -> HTTP 401
+[00:22:24] TOKEN CON FIRMA ALTERADA GET /api/clientes
+{"error":"Token inválido o expirado."}
+  -> HTTP 401
+[00:22:24] HEADER SIN 'Bearer' GET /api/clientes
+{"error":"Acceso denegado. Token no proporcionado."}
+  -> HTTP 401
+--- CP-SEG-07 cabeceras backend
+[00:22:25] GET http://localhost:5000/api/health
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 15
+ETag: W/"f-VaSQ4oDUiZblZNAEkkN+sX+q3Sg"
+Date: Tue, 20 Oct 2026 03:22:25 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+[00:22:25] CORS preflight desde Origin http://sitio-externo.test
+HTTP/1.1 204 No Content
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE
+Vary: Access-Control-Request-Headers
+Access-Control-Allow-Headers: authorization
+Content-Length: 0
+Date: Tue, 20 Oct 2026 03:22:25 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+--- CP-SEG-07 cabeceras frontend
+[00:22:25] GET http://localhost:3000/
+HTTP/1.1 200 OK
+Server: nginx/1.27.5
+Date: Tue, 20 Oct 2026 03:22:25 GMT
+Content-Type: text/html
+Content-Length: 519
+Last-Modified: Tue, 20 Oct 2026 02:52:32 GMT
+Connection: keep-alive
+ETag: "6ad6d770-207"
+Accept-Ranges: bytes
+

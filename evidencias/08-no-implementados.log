@@ -1,0 +1,42 @@
+### Requisitos no implementados - 20-10-2026 00:28:27
+[00:28:27] RF-3.1 crear usuario POST /api/usuarios
+{"error":"Ruta no encontrada."}
+  -> HTTP 404
+[00:28:27] RF-3.3 listar/desactivar usuarios GET /api/usuarios
+{"error":"Ruta no encontrada."}
+  -> HTTP 404
+[00:28:27] RF-4.2 editar cliente PUT /api/clientes/25
+{"error":"Ruta no encontrada."}
+  -> HTTP 404
+[00:28:28] RF-4.2 paginacion GET /api/clientes?page=1&limit=2 (cantidad de elementos devueltos):
+  -> 7 clientes (ignora limit=2)
+[00:28:28] RF-5.1/5.4 crear contrato con fechas/estado POST /api/contratos
+{"error":"Ruta no encontrada."}
+  -> HTTP 404
+[00:28:28] RF-5.4 cambiar estado PUT /api/contratos/1
+{"error":"Ruta no encontrada."}
+  -> HTTP 404
+                                        Table "public.contratos"
+   Column   |            Type             | Collation | Nullable |                Default                
+------------+-----------------------------+-----------+----------+---------------------------------------
+ id         | integer                     |           | not null | nextval('contratos_id_seq'::regclass)
+ cliente_id | integer                     |           |          | 
+ titulo     | character varying(150)      |           | not null | 
+ monto      | numeric(12,2)               |           | not null | 
+ pdf_url    | character varying(255)      |           |          | 
+ created_at | timestamp without time zone |           |          | CURRENT_TIMESTAMP
+Indexes:
+    "contratos_pkey" PRIMARY KEY, btree (id)
+    "idx_contratos_cliente" btree (cliente_id)
+Foreign-key constraints:
+    "contratos_cliente_id_fkey" FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+
+[00:28:28] RF-5.5 enlace compartido GET /api/contratos/1/compartir
+{"error":"Ruta no encontrada."}
+  -> HTTP 404
+[00:28:28] Swagger GET /docs
+{"error":"Ruta no encontrada."}
+  -> HTTP 404
+[00:28:28] Swagger GET /api/docs
+{"error":"Ruta no encontrada."}
+  -> HTTP 404

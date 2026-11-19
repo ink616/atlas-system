@@ -1,0 +1,154 @@
+{
+  "info": {
+    "name": "Atlas API - Pruebas automatizadas (EP3 ISY1102)",
+    "description": "Suite automatizada de pruebas funcionales, de integracion y de seguridad sobre la API de Atlas. Ejecutar con Newman. Cada request lleva assertions (pm.test) que validan codigos HTTP, estructura y reglas de negocio/seguridad.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "CP-FUN-01 Login admin valido",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+        "const b = pm.response.json();",
+        "pm.test('Devuelve token JWT', () => pm.expect(b.token).to.be.a('string').and.not.empty);",
+        "pm.test('Devuelve rol ADMINISTRADOR', () => pm.expect(b.usuario.rol).to.eql('ADMINISTRADOR'));",
+        "if (b.token) pm.environment.set('token_admin', b.token);"
+      ], "type": "text/javascript" } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@atlas.cl\",\n  \"password\": \"Password123!\"\n}" },
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api","auth","login"] }
+      }
+    },
+    {
+      "name": "CP-FUN-01b Login editor valido",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+        "const b = pm.response.json();",
+        "pm.test('Rol EDITOR', () => pm.expect(b.usuario.rol).to.eql('EDITOR'));",
+        "if (b.token) pm.environment.set('token_editor', b.token);"
+      ], "type": "text/javascript" } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"editor@atlas.cl\",\n  \"password\": \"Password123!\"\n}" },
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api","auth","login"] }
+      }
+    },
+    {
+      "name": "CP-FUN-02 Login invalido (clave incorrecta)",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
+        "pm.test('Mensaje generico, no revela si el usuario existe', () => pm.expect(pm.response.json().error).to.match(/inv[aá]lid/i));"
+      ], "type": "text/javascript" } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@atlas.cl\",\n  \"password\": \"claveMala\"\n}" },
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api","auth","login"] }
+      }
+    },
+    {
+      "name": "CP-FUN-02b Login campos vacios",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+      ], "type": "text/javascript" } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"\",\n  \"password\": \"\"\n}" },
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api","auth","login"] }
+      }
+    },
+    {
+      "name": "CP-FUN-11 Crear cliente (admin)",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+        "const b = pm.response.json();",
+        "pm.test('Devuelve id de cliente', () => pm.expect(b.id).to.be.a('number'));",
+        "if (b.id) pm.environment.set('cliente_id', b.id);"
+      ], "type": "text/javascript" } }],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"rut\": \"11.111.111-1\",\n  \"razon_social\": \"Cliente QA Automatizado\",\n  \"datos_bancarios\": { \"banco\": \"QA Bank\", \"cuenta\": \"00-0000-0\" }\n}" },
+        "url": { "raw": "{{baseUrl}}/api/clientes", "host": ["{{baseUrl}}"], "path": ["api","clientes"] }
+      }
+    },
+    {
+      "name": "CP-FUN-12 Listar clientes (admin)",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+        "pm.test('Respuesta es un arreglo', () => pm.expect(pm.response.json()).to.be.an('array'));"
+      ], "type": "text/javascript" } }],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+        "url": { "raw": "{{baseUrl}}/api/clientes", "host": ["{{baseUrl}}"], "path": ["api","clientes"] }
+      }
+    },
+    {
+      "name": "CP-SEG-04 Acceso sin token -> 401",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('HTTP 401 sin Authorization', () => pm.response.to.have.status(401));"
+      ], "type": "text/javascript" } }],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/clientes", "host": ["{{baseUrl}}"], "path": ["api","clientes"] }
+      }
+    },
+    {
+      "name": "CP-SEG-04b Acceso con token basura -> 401",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('HTTP 401 con token invalido', () => pm.response.to.have.status(401));"
+      ], "type": "text/javascript" } }],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer token.falso.123" }],
+        "url": { "raw": "{{baseUrl}}/api/clientes", "host": ["{{baseUrl}}"], "path": ["api","clientes"] }
+      }
+    },
+    {
+      "name": "CP-FUN-09 RBAC: editor intenta eliminar -> 403",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('HTTP 403 (editor sin permiso de borrado)', () => pm.response.to.have.status(403));",
+        "pm.test('Mensaje de acceso prohibido', () => pm.expect(pm.response.json().error).to.match(/prohibido|permis/i));"
+      ], "type": "text/javascript" } }],
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token_editor}}" }],
+        "url": { "raw": "{{baseUrl}}/api/clientes/{{cliente_id}}", "host": ["{{baseUrl}}"], "path": ["api","clientes","{{cliente_id}}"] }
+      }
+    },
+    {
+      "name": "CP-SEG-05 Inyeccion SQL en login -> 401 (sin bypass)",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('No hay bypass: HTTP 401', () => pm.response.to.have.status(401));",
+        "pm.test('Sin error de base de datos expuesto', () => pm.expect(pm.response.text()).to.not.match(/syntax|postgres|pg_|SQL/i));"
+      ], "type": "text/javascript" } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@atlas.cl' OR '1'='1\",\n  \"password\": \"x' OR '1'='1\"\n}" },
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api","auth","login"] }
+      }
+    },
+    {
+      "name": "CP-FUN-13 Eliminar cliente (admin) -> 200",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('HTTP 200 (admin si puede)', () => pm.response.to.have.status(200));"
+      ], "type": "text/javascript" } }],
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+        "url": { "raw": "{{baseUrl}}/api/clientes/{{cliente_id}}", "host": ["{{baseUrl}}"], "path": ["api","clientes","{{cliente_id}}"] }
+      }
+    }
+  ],
+  "variable": [{ "key": "baseUrl", "value": "http://localhost:5000" }]
+}

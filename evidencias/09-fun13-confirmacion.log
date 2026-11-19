@@ -1,0 +1,25 @@
+### CP-FUN-13 (UI) - 20-10-2026 01:41:34
+[01:41:39] Clientes antes: [
+  'Distribuidora del Sur Ltda.',
+  'Cliente Smoke SpA',
+  'RUT letras',
+  'RUT DV malo',
+  "<script>alert('XSS-1')</script>",
+  "<img src=x onerror=alert('XSS-2')>",
+  `"><svg onload=alert('XSS-3')>`
+]
+[01:41:41] Click en "Eliminar" de "RUT DV malo" (id 29). Dialogos de confirmacion mostrados: 0 []
+[01:41:41] Aviso: Cliente con ID 29 eliminado lógicamente con éxito.
+[01:41:41] Clientes despues: [
+  'Distribuidora del Sur Ltda.',
+  'Cliente Smoke SpA',
+  'RUT letras',
+  "<script>alert('XSS-1')</script>",
+  "<img src=x onerror=alert('XSS-2')>",
+  `"><svg onload=alert('XSS-3')>`
+]
+ id | razon_social | eliminado_logico 
+----+--------------+------------------
+ 29 | RUT DV malo  | t
+(1 row)
+
