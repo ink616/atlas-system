@@ -104,6 +104,7 @@ jobs:
         with:
           target: 'http://localhost:3000'
           fail_action: false
+          allow_issue_writing: false
         # Norma: OWASP Top 10 - CSRF/XSS, cabeceras, control de acceso
 
   # --- DEPLOY: gate de calidad ---
