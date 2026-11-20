@@ -1,0 +1,10 @@
+title = "Config gitleaks - Atlas"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Evidencias QA: tokens JWT de sesiones de prueba (datos sinteticos, expirados)"
+paths = [
+  '''evidencias/'''
+]
